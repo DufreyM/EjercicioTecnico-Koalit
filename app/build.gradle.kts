@@ -40,6 +40,9 @@ android {
 }
 
 dependencies {
+    // Coil for image loading
+    implementation(libs.coil.compose)
+
     //Libreria para poder usar los iconos necesarios en Login
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.ktx)
