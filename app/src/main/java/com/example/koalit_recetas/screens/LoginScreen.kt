@@ -1,13 +1,17 @@
 package com.example.koalit_recetas.screens
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.koalit_recetas.data.SessionManager
 import kotlinx.coroutines.launch
@@ -31,6 +34,21 @@ fun LoginScreen(navController: NavHostController) {
     val sessionManager = remember { SessionManager(context) }
     val coroutineScope = rememberCoroutineScope()
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val isLoggedIn by sessionManager.isLoggedIn.collectAsState(initial = false)
+    val rememberUser by sessionManager.rememberMe.collectAsState(initial = false)
+
+    // 🔹 Ahora verificamos correctamente si se debe iniciar sesión automáticamente
+    LaunchedEffect(isLoggedIn, rememberUser) {
+        if (isLoggedIn && rememberUser) {
+            navController.navigate("main_screen") {
+                popUpTo("login_screen") { inclusive = true }
+            }
+        } else {
+            coroutineScope.launch { //Limpia los datos
+                sessionManager.clearSession()
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -46,10 +64,8 @@ fun LoginScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-
             Text("El arte del sabor", color = Color.White, fontSize = 35.sp)
 
-            // Campo de Email
             OutlinedTextField(
                 value = email.value,
                 onValueChange = { email.value = it },
@@ -61,7 +77,6 @@ fun LoginScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Campo de Contraseña
             OutlinedTextField(
                 value = password.value,
                 onValueChange = { password.value = it },
@@ -90,7 +105,6 @@ fun LoginScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Mostrar error si hay uno
             errorMessage?.let {
                 Text(it, color = Color.Red)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -100,7 +114,7 @@ fun LoginScreen(navController: NavHostController) {
                 onClick = {
                     if (email.value == "info@koalit.dev" && password.value == "koalit123") {
                         coroutineScope.launch {
-                            sessionManager.saveSession(email.value)
+                            sessionManager.saveSession(email.value, rememberMe.value)
                             navController.navigate("main_screen") {
                                 popUpTo("login_screen") { inclusive = true }
                             }
@@ -112,8 +126,8 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFD2800B), // Naranja
-                    contentColor = Color.White // Texto en blanco
+                    containerColor = Color(0xFFD2800B),
+                    contentColor = Color.White
                 )
             ) {
                 Text("Iniciar Sesión", fontSize = 18.sp)
