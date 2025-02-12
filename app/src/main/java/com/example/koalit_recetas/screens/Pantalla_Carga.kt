@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SoupKitchen
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -12,13 +13,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import kotlinx.coroutines.delay
 
 @Composable
-fun Pantalla_Carga(navController: NavController? = null) {
+fun Pantalla_Carga(navController: NavHostController) {
+
+    //Corrección de pantalla de carga, para que duré solo un tiempo.
+    LaunchedEffect(Unit) {
+        delay(3000) // Espera 3 segundos
+        navController.navigate("login") {
+            popUpTo("loading") { inclusive = true } // Elimina la pantalla
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -49,9 +59,13 @@ fun Pantalla_Carga(navController: NavController? = null) {
                 fontSize = 30.sp,
                 fontFamily = FontFamily.Serif
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Solo para indicarle al usuario que algo se esta cargando y no que quedo congelada la pantalla
+            CircularProgressIndicator(color = Color.White)
         }
 
-        // "By: Koalit" en la esquina inferior derecha
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -61,11 +75,4 @@ fun Pantalla_Carga(navController: NavController? = null) {
             Text("By: Koalit", color = Color.White, fontSize = 14.sp)
         }
     }
-}
-
-// Preview para probarlo
-@Preview(showBackground = true, backgroundColor = 0xFF6FE7B7)
-@Composable
-fun PreviewPantalla_Carga() {
-    Pantalla_Carga()
 }

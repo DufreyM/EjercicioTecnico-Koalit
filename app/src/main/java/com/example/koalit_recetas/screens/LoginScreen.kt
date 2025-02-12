@@ -26,9 +26,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 
 @Composable
-fun LoginScreen(navController: NavController? = null) {
+fun LoginScreen(navController: NavHostController) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val rememberMe = remember { mutableStateOf(false) }
@@ -128,9 +129,3 @@ fun LoginScreen(navController: NavController? = null) {
     }
 }
 
-//Preview para probarlo
-@Preview(showBackground = true, backgroundColor = 0xFF6FE7B7)
-@Composable
-fun PreviewLoginScreen() {
-    LoginScreen()
-}

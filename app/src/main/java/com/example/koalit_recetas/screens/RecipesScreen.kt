@@ -17,10 +17,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.koalit_recetas.R
 
 @Composable
-fun RecipeScreen(navController: NavController? = null) {
+fun RecipeScreen(navController: NavHostController) {
     val ingredients = remember { mutableStateListOf("") }
     val steps = remember { mutableStateOf("") }
 
@@ -135,10 +136,4 @@ fun CustomTopBar() {
 
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewRecipeScreen() {
-    RecipeScreen()
 }

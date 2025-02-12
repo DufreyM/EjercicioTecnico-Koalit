@@ -22,9 +22,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 
 @Composable
-fun MainScreen(navController: NavController? = null) {
+fun MainScreen(navController: NavHostController) {
     var favoriteFilter by remember { mutableStateOf(false) }
     var sortOrder by remember { mutableStateOf(SortOrder.Ascending) }
 
@@ -143,8 +144,3 @@ data class Recipe(val title: String, val description: String, val time: Int, val
 
 enum class SortOrder { Ascending, Descending }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewMainScreen() {
-    MainScreen()
-}
