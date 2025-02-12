@@ -1,38 +1,36 @@
 package com.example.koalit_recetas.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DinnerDining
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.koalit_recetas.data.SessionManager
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val rememberMe = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val coroutineScope = rememberCoroutineScope()
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -49,31 +47,21 @@ fun LoginScreen(navController: NavHostController) {
             modifier = Modifier.padding(16.dp)
         ) {
 
-            // Icono de arriba, usuario
-            Icon(
-                imageVector = Icons.Default.DinnerDining,
-                contentDescription = "Icono Usuario",
-                tint = Color.White,
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.3f))
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            Text("El arte del sabor", color = Color.White, fontSize = 35.sp)
 
-            Text("El arte del sabor", color = Color.White, fontSize = 35.sp, fontFamily = FontFamily.Serif)
-
-            // Campos de entrada para iniciar la sesión.
-            // usuario y contraseña
+            // Campo de Email
             OutlinedTextField(
                 value = email.value,
                 onValueChange = { email.value = it },
                 label = { Text("Usuario") },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = "User") },
                 modifier = Modifier.fillMaxWidth(),
-
+                singleLine = true
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Campo de Contraseña
             OutlinedTextField(
                 value = password.value,
                 onValueChange = { password.value = it },
@@ -81,12 +69,11 @@ fun LoginScreen(navController: NavHostController) {
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Lock") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
-
+                singleLine = true
             )
 
-            // Olvidaste la contraseña
-            // No implementado
             Spacer(modifier = Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -97,35 +84,40 @@ fun LoginScreen(navController: NavHostController) {
                         checked = rememberMe.value,
                         onCheckedChange = { rememberMe.value = it }
                     )
-                    Text("Recuerdame", color = Color.White)
-                }
-                TextButton(onClick = { /* OLVIDASTE LA CONSTRASEÑA */ }) {
-                    Text("Olvidaste la contraseña", color = Color.White)
+                    Text("Recuérdame", color = Color.White)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Mostrar error si hay uno
+            errorMessage?.let {
+                Text(it, color = Color.Red)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             Button(
-                onClick = { /* REDIRIGIR A LA PRINCIPAL */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
+                onClick = {
+                    if (email.value == "info@koalit.dev" && password.value == "koalit123") {
+                        coroutineScope.launch {
+                            sessionManager.saveSession(email.value)
+                            navController.navigate("main_screen") {
+                                popUpTo("login_screen") { inclusive = true }
+                            }
+                        }
+                    } else {
+                        errorMessage = "Correo o contraseña incorrectos"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(25.dp),
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFD2800B), // Naranja
                     contentColor = Color.White // Texto en blanco
                 )
             ) {
                 Text("Iniciar Sesión", fontSize = 18.sp)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // No implementado
-            TextButton(onClick = { /* REDIRIGIR A LA PÁGINA DE REGISTRARSE */ }) {
-                Text("Registrarse", color = Color.White)
-            }
         }
     }
 }
-

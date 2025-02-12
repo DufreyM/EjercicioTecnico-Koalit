@@ -19,13 +19,11 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
 
 @Composable
-fun Pantalla_Carga(navController: NavHostController) {
-
-    //Corrección de pantalla de carga, para que duré solo un tiempo.
+fun Pantalla_Carga(navController: NavHostController, startDestination: String) {
     LaunchedEffect(Unit) {
         delay(3000) // Espera 3 segundos
-        navController.navigate("login") {
-            popUpTo("loading") { inclusive = true } // Elimina la pantalla
+        navController.navigate(startDestination) {
+            popUpTo("pantalla_carga") { inclusive = true }
         }
     }
 
@@ -42,17 +40,15 @@ fun Pantalla_Carga(navController: NavHostController) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Icono de cocina
             Icon(
                 imageVector = Icons.Default.SoupKitchen,
                 contentDescription = "Cocina",
                 tint = Color.White,
-                modifier = Modifier.size(150.dp) // Icono grande
+                modifier = Modifier.size(150.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Texto El arte del sabor
             Text(
                 text = "El arte del sabor",
                 color = Color.White,
@@ -62,7 +58,6 @@ fun Pantalla_Carga(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Solo para indicarle al usuario que algo se esta cargando y no que quedo congelada la pantalla
             CircularProgressIndicator(color = Color.White)
         }
 

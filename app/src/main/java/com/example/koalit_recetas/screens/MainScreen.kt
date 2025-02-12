@@ -16,13 +16,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.koalit_recetas.data.SessionManager
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(navController: NavHostController) {
@@ -31,7 +32,13 @@ fun MainScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            CustomTopBar(favoriteFilter, sortOrder, { favorite -> favoriteFilter = favorite }, { order -> sortOrder = order })
+            CustomTopBar(
+                favoriteFilter,
+                sortOrder,
+                onFavoriteFilterChanged = { favorite -> favoriteFilter = favorite },
+                onSortOrderChanged = { order -> sortOrder = order },
+                navController = navController // Se pasa para manejar la navegación
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -49,13 +56,19 @@ fun MainScreen(navController: NavHostController) {
     }
 }
 
+
 @Composable
 fun CustomTopBar(
     favoriteFilter: Boolean,
     sortOrder: SortOrder,
     onFavoriteFilterChanged: (Boolean) -> Unit,
-    onSortOrderChanged: (SortOrder) -> Unit
+    onSortOrderChanged: (SortOrder) -> Unit,
+    navController: NavHostController // Se pasa el NavController
 ) {
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val coroutineScope = rememberCoroutineScope()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -71,7 +84,6 @@ fun CustomTopBar(
             modifier = Modifier.weight(1f)
         )
 
-        // Filtro de favoritos
         IconToggleButton(checked = favoriteFilter, onCheckedChange = onFavoriteFilterChanged) {
             Icon(
                 imageVector = Icons.Default.Favorite,
@@ -80,7 +92,6 @@ fun CustomTopBar(
             )
         }
 
-        // Ordenar por tiempo
         IconButton(onClick = {
             onSortOrderChanged(if (sortOrder == SortOrder.Ascending) SortOrder.Descending else SortOrder.Ascending)
         }) {
@@ -90,16 +101,24 @@ fun CustomTopBar(
             )
         }
 
-        // Cerrar sesión
+        // Botón de Cerrar Sesión
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
             contentDescription = "Cerrar sesión",
             modifier = Modifier
                 .size(28.dp)
-                .clickable { /* Acción de cerrar sesión */ }
+                .clickable {
+                    coroutineScope.launch {
+                        sessionManager.clearSession()
+                        navController.navigate("login_screen") {
+                            popUpTo("main_screen") { inclusive = true }
+                        }
+                    }
+                }
         )
     }
 }
+
 
 @Composable
 fun RecipeList(favoriteFilter: Boolean, sortOrder: SortOrder, modifier: Modifier = Modifier) {
