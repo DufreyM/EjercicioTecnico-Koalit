@@ -22,27 +22,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.koalit_recetas.viewModel.RecipeViewModel
 import com.example.koalit_recetas.data.SessionManager
 import kotlinx.coroutines.launch
 
+//Faltantes, cuando se clickea una receta esta no abre los detalles.
+
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController, recipeViewModel: RecipeViewModel) {
     var favoriteFilter by remember { mutableStateOf(false) }
     var sortOrder by remember { mutableStateOf(SortOrder.Ascending) }
 
     Scaffold(
-        topBar = {
-            CustomTopBar(
-                favoriteFilter,
-                sortOrder,
-                onFavoriteFilterChanged = { favorite -> favoriteFilter = favorite },
-                onSortOrderChanged = { order -> sortOrder = order },
-                navController = navController // Se pasa para manejar la navegación
-            )
-        },
+        topBar = { CustomTopBar(favoriteFilter, sortOrder, { favoriteFilter = it }, { sortOrder = it }, navController) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Navegar a agregar receta */ },
+                onClick = { navController.navigate("recipe_screen") },
                 containerColor = Color(0xFFE19A1C),
                 contentColor = Color.White
             ) {
@@ -51,11 +46,27 @@ fun MainScreen(navController: NavHostController) {
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            RecipeList(favoriteFilter, sortOrder)
+            RecipeList(recipeViewModel.recipes, favoriteFilter, sortOrder)
         }
     }
 }
 
+
+@Composable
+fun RecipeList(recipes: List<Recipe>, favoriteFilter: Boolean, sortOrder: SortOrder) {
+    val filteredRecipes = recipes.filter { it.isFavorite == favoriteFilter || !favoriteFilter }
+    val sortedRecipes = when (sortOrder) {
+        SortOrder.Ascending -> filteredRecipes.sortedBy { it.time }
+        SortOrder.Descending -> filteredRecipes.sortedByDescending { it.time }
+    }
+
+    LazyColumn(modifier = Modifier.padding(16.dp)) {
+        items(sortedRecipes.size) { index ->
+            RecipeItem(sortedRecipes[index])
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
 
 @Composable
 fun CustomTopBar(

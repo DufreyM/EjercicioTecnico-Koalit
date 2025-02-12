@@ -12,6 +12,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.koalit_recetas.data.SessionManager
 import kotlinx.coroutines.launch
+
+//Faltantes: Eliminar correo y contraseña de verificación de aquí por seguridad del usuario.
+//Crear notificación en olvidaste contraseña y registrarse que no están implementados aún.
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
@@ -101,6 +105,10 @@ fun LoginScreen(navController: NavHostController) {
                     )
                     Text("Recuérdame", color = Color.White)
                 }
+                //No implementado
+                TextButton(onClick = { /*  */ }) {
+                    Text("Olvidaste la contraseña", color = Color.White)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -131,6 +139,10 @@ fun LoginScreen(navController: NavHostController) {
                 )
             ) {
                 Text("Iniciar Sesión", fontSize = 18.sp)
+            }
+            // No implementado
+            TextButton(onClick = { /*  */ }) {
+                Text("Registrarse", color = Color.White)
             }
         }
     }
