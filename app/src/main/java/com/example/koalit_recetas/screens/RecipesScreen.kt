@@ -3,6 +3,7 @@ package com.example.koalit_recetas.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,9 +16,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.koalit_recetas.R
 import com.example.koalit_recetas.viewModel.RecipeViewModel
+import androidx.compose.ui.text.input.KeyboardType
+
 
 //Me falta cambiar cuando ingredientes se agregan más de 3, el botón más y cancelar desaparecen y ya no se puede agregar la receta COMPLETO
-//Validar que en el tiempo solo se puedan ingresar números
+//Validar que en el tiempo solo se puedan ingresar números Completo
 //Modificar la foto, por el momento muestra una foto quemada de pasta.
 //Agregar el icono de estrella para poder marcar recetas como favoritas.
 //Usar ROOM Database para almacenar los datos localmente.
@@ -46,8 +49,9 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
         Text("Tiempo de preparación (min)")
         OutlinedTextField(
             value = time.value,
-            onValueChange = { if (it.all { char -> char.isDigit() }) time.value = it }, // Solo permite números
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = { if (it.all { char -> char.isDigit() }) time.value = it },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
