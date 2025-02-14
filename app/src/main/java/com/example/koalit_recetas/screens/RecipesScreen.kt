@@ -4,10 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -17,7 +21,6 @@ import androidx.navigation.NavHostController
 import com.example.koalit_recetas.R
 import com.example.koalit_recetas.viewModel.RecipeViewModel
 import androidx.compose.ui.text.input.KeyboardType
-
 
 //Me falta cambiar cuando ingredientes se agregan más de 3, el botón más y cancelar desaparecen y ya no se puede agregar la receta COMPLETO
 //Validar que en el tiempo solo se puedan ingresar números Completo
@@ -32,9 +35,10 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
     val time = remember { mutableStateOf("") }
     val ingredients = remember { mutableStateListOf("") }
     val steps = remember { mutableStateOf("") }
+    val isFavorite = remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        CustomTopBar()
+        CustomTopBar(isFavorite)
 
         Text("Nombre de la receta", fontWeight = FontWeight.Bold)
         OutlinedTextField(value = name.value, onValueChange = { name.value = it }, modifier = Modifier.fillMaxWidth())
@@ -101,7 +105,7 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
                             description = description.value,
                             time = time.value.toIntOrNull() ?: 0,
                             image = R.drawable.pasta,
-                            isFavorite = false
+                            isFavorite = isFavorite.value
                         )
 
                         recipeViewModel.addRecipe(newRecipe)
@@ -124,7 +128,7 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
 
 
 @Composable
-fun CustomTopBar() {
+fun CustomTopBar(isFavorite: MutableState<Boolean>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,6 +145,15 @@ fun CustomTopBar() {
             modifier = Modifier.weight(1f)
 
         )
+        IconButton(onClick = { isFavorite.value = !isFavorite.value }) {
+            Icon(
+                imageVector = if (isFavorite.value) Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                contentDescription = "Marcar como favorita",
+                tint = if (isFavorite.value) Color.Red else Color.Gray,
+                modifier = Modifier
+                    .size(32.dp)
+            )
+        }
     }
 }
 
