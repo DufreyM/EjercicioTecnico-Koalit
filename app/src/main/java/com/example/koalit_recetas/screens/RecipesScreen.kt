@@ -16,7 +16,7 @@ import androidx.navigation.NavHostController
 import com.example.koalit_recetas.R
 import com.example.koalit_recetas.viewModel.RecipeViewModel
 
-//Me falta cambiar cuando ingredientes se agregan más de 3, el botón más y cancelar desaparecen y ya no se puede agregar la receta
+//Me falta cambiar cuando ingredientes se agregan más de 3, el botón más y cancelar desaparecen y ya no se puede agregar la receta COMPLETO
 //Validar que en el tiempo solo se puedan ingresar números
 //Modificar la foto, por el momento muestra una foto quemada de pasta.
 //Agregar el icono de estrella para poder marcar recetas como favoritas.
@@ -32,6 +32,7 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         CustomTopBar()
+
         Text("Nombre de la receta", fontWeight = FontWeight.Bold)
         OutlinedTextField(value = name.value, onValueChange = { name.value = it }, modifier = Modifier.fillMaxWidth())
 
@@ -43,34 +44,50 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
         Spacer(modifier = Modifier.height(8.dp))
 
         Text("Tiempo de preparación (min)")
-        OutlinedTextField(value = time.value, onValueChange = { time.value = it }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            value = time.value,
+            onValueChange = { if (it.all { char -> char.isDigit() }) time.value = it }, // Solo permite números
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text("Ingredientes:")
-        LazyColumn {
-            items(ingredients.size) { index ->
-                OutlinedTextField(
-                    value = ingredients[index],
-                    onValueChange = { ingredients[index] = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Ingrediente ${index + 1}") }
-                )
+
+        Box(modifier = Modifier.weight(2f)) {  // Permite que la lista se expanda sin empujar los botones
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(1f) // Establece un tamaño máximo desplazable
+            ) {
+                items(ingredients.size) { index ->
+                    OutlinedTextField(
+                        value = ingredients[index],
+                        onValueChange = { ingredients[index] = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Ingrediente ${index + 1}") }
+                    )
+                }
             }
         }
-        Button(onClick = { ingredients.add("") },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)))
-        {
+
+        Button(
+            onClick = { ingredients.add("") }, // Agregar ingrediente
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+        ) {
             Text("Agregar Ingrediente")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text("Pasos")
-        OutlinedTextField(value = steps.value, onValueChange = { steps.value = it }, modifier = Modifier.fillMaxWidth().height(150.dp))
+        OutlinedTextField(
+            value = steps.value,
+            onValueChange = { steps.value = it },
+            modifier = Modifier.fillMaxWidth().height(150.dp)
+        )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
 
+        // Sección de botones siempre visible
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(
                 onClick = {
