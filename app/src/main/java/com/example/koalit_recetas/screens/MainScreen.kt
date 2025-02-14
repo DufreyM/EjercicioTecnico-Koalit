@@ -22,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import com.example.koalit_recetas.R
 import com.example.koalit_recetas.viewModel.RecipeViewModel
 import com.example.koalit_recetas.data.SessionManager
 import kotlinx.coroutines.launch
@@ -154,23 +156,35 @@ fun RecipeList(favoriteFilter: Boolean, sortOrder: SortOrder, modifier: Modifier
 @Composable
 fun RecipeItem(recipe: Recipe) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { /* Ver detalles */ },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { /* Ver detalles */ },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Image(painter = painterResource(id = recipe.image), contentDescription = null, modifier = Modifier.size(64.dp))
+            val painter = if (recipe.image?.startsWith("content://") == true) {
+                rememberAsyncImagePainter(recipe.image) // Carga desde URI
+            } else {
+                painterResource(id = R.drawable.default_image)
+            }
+
+            Image(painter = painter, contentDescription = null, modifier = Modifier.size(64.dp))
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(recipe.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Text(recipe.description, fontSize = 14.sp, color = Color.Gray)
             }
+
             Text("${recipe.time} min", fontWeight = FontWeight.Bold, fontSize = 14.sp)
         }
     }
 }
 
-data class Recipe(val title: String, val description: String, val time: Int, val image: Int, var isFavorite: Boolean)
+
+data class Recipe(val title: String, val description: String, val time: Int, val image: String?, var isFavorite: Boolean)
 
 enum class SortOrder { Ascending, Descending }
 
