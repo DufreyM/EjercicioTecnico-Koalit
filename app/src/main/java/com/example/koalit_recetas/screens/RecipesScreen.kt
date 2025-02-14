@@ -28,10 +28,6 @@ import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.koalit_recetas.viewModel.RecipeViewModel
 
-//Me falta cambiar cuando ingredientes se agregan más de 3, el botón más y cancelar desaparecen y ya no se puede agregar la receta COMPLETO
-//Validar que en el tiempo solo se puedan ingresar números Completo
-//Modificar la foto, por el momento muestra una foto quemada de pasta.Completo
-//Agregar el icono de estrella para poder marcar recetas como favoritas. Completo
 //Usar ROOM Database para almacenar los datos localmente.
 
 @Composable
@@ -59,7 +55,7 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp) // Altura fija para evitar deformaciones
-                .background(Color.Gray) // Fondo para ver dónde está la imagen
+                .background(Color(0xFFFFC675)) // Fondo para ver dónde está la imagen
         ) {
             imageUri.value?.let { uri ->
                 Image(
@@ -150,7 +146,9 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
                             description = description.value,
                             time = time.value.toIntOrNull() ?: 0,
                             image = imageUri.value?.toString() ?: "", // Guardar la URI de la imagen
-                            isFavorite = isFavorite.value
+                            isFavorite = isFavorite.value,
+                            pasos = steps.value,
+                            ingredientes = ingredients.toList()
                         )
                         recipeViewModel.addRecipe(newRecipe)
                         navController.popBackStack()

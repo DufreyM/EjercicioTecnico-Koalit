@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 fun MainScreen(navController: NavHostController, recipeViewModel: RecipeViewModel) {
     var favoriteFilter by remember { mutableStateOf(false) }
     var sortOrder by remember { mutableStateOf(SortOrder.Ascending) }
+    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) } // Estado para el modal
 
     Scaffold(
         topBar = { CustomTopBar(favoriteFilter, sortOrder, { favoriteFilter = it }, { sortOrder = it }, navController) },
@@ -48,14 +49,23 @@ fun MainScreen(navController: NavHostController, recipeViewModel: RecipeViewMode
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            RecipeList(recipeViewModel.recipes, favoriteFilter, sortOrder)
+            RecipeList(
+                recipes = recipeViewModel.recipes,
+                favoriteFilter = favoriteFilter,
+                sortOrder = sortOrder,
+                onRecipeClick = { selectedRecipe = it } // Al hacer clic en una receta, se abre el modal
+            )
         }
+    }
+
+    // Muestra los detalles de la receta en un diálogo si se ha seleccionado una receta
+    selectedRecipe?.let { recipe ->
+        RecipeDetailsDialog(recipe, onDismiss = { selectedRecipe = null })
     }
 }
 
-
 @Composable
-fun RecipeList(recipes: List<Recipe>, favoriteFilter: Boolean, sortOrder: SortOrder) {
+fun RecipeList(recipes: List<Recipe>, favoriteFilter: Boolean, sortOrder: SortOrder, onRecipeClick: (Recipe) -> Unit) {
     val filteredRecipes = recipes.filter { it.isFavorite == favoriteFilter || !favoriteFilter }
     val sortedRecipes = when (sortOrder) {
         SortOrder.Ascending -> filteredRecipes.sortedBy { it.time }
@@ -64,7 +74,7 @@ fun RecipeList(recipes: List<Recipe>, favoriteFilter: Boolean, sortOrder: SortOr
 
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         items(sortedRecipes.size) { index ->
-            RecipeItem(sortedRecipes[index])
+            RecipeItem(sortedRecipes[index], onClick = { onRecipeClick(sortedRecipes[index]) })
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
@@ -132,33 +142,12 @@ fun CustomTopBar(
     }
 }
 
-
 @Composable
-fun RecipeList(favoriteFilter: Boolean, sortOrder: SortOrder, modifier: Modifier = Modifier) {
-    // Lista vacía de recetas
-    val recipes = emptyList<Recipe>()
-
-    val filteredRecipes = recipes.filter { it.isFavorite == favoriteFilter || !favoriteFilter }
-
-    val sortedRecipes = when (sortOrder) {
-        SortOrder.Ascending -> filteredRecipes.sortedBy { it.time }
-        SortOrder.Descending -> filteredRecipes.sortedByDescending { it.time }
-    }
-
-    LazyColumn(modifier = modifier.padding(16.dp)) {
-        items(sortedRecipes.size) { index ->
-            RecipeItem(sortedRecipes[index])
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-@Composable
-fun RecipeItem(recipe: Recipe) {
+fun RecipeItem(recipe: Recipe, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Ver detalles */ },
+            .clickable { onClick() }, // Se activa el modal
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
@@ -183,8 +172,47 @@ fun RecipeItem(recipe: Recipe) {
     }
 }
 
+@Composable
+fun RecipeDetailsDialog(recipe: Recipe, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(recipe.title, fontSize = 20.sp, fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                val painter = if (recipe.image?.startsWith("content://") == true) {
+                    rememberAsyncImagePainter(recipe.image)
+                } else {
+                    painterResource(id = R.drawable.default_image)
+                }
 
-data class Recipe(val title: String, val description: String, val time: Int, val image: String?, var isFavorite: Boolean)
+                Image(painter = painter, contentDescription = null, modifier = Modifier.size(120.dp))
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = "Descripción:", fontWeight = FontWeight.Bold)
+                Text(text = recipe.description, fontSize = 16.sp)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = "Tiempo: ${recipe.time} min", fontWeight = FontWeight.Bold)
+
+                Text(text = "Pasos:", fontWeight = FontWeight.Bold)
+                Text(text = recipe.pasos, fontSize = 16.sp)
+
+            }
+        },
+        confirmButton = {
+        },
+        dismissButton = {
+            Button(onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),) {
+                Text("Cerrar")
+            }
+        }
+    )
+}
+
+data class Recipe(val title: String, val description: String, val time: Int, val image: String?, var isFavorite: Boolean, val pasos: String, val ingredientes: List<String>)
 
 enum class SortOrder { Ascending, Descending }
 
