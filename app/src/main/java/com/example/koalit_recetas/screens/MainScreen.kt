@@ -35,6 +35,18 @@ fun MainScreen(navController: NavHostController, recipeViewModel: RecipeViewMode
     var favoriteFilter by remember { mutableStateOf(false) }
     var sortOrder by remember { mutableStateOf(SortOrder.Ascending) }
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) } // Estado para el modal
+    val recipes by recipeViewModel.recipes.collectAsState()
+    val convertedRecipes = recipes.map { entity ->
+        Recipe(
+            title = entity.title,
+            description = entity.description,
+            time = entity.time,
+            image = entity.image,
+            isFavorite = entity.isFavorite,
+            pasos = entity.pasos,
+            ingredientes = entity.ingredientes.split(",") // Convierte el String en una lista
+        )
+    }
 
     Scaffold(
         topBar = { CustomTopBar(favoriteFilter, sortOrder, { favoriteFilter = it }, { sortOrder = it }, navController) },
@@ -50,10 +62,10 @@ fun MainScreen(navController: NavHostController, recipeViewModel: RecipeViewMode
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             RecipeList(
-                recipes = recipeViewModel.recipes,
+                recipes = convertedRecipes,
                 favoriteFilter = favoriteFilter,
                 sortOrder = sortOrder,
-                onRecipeClick = { selectedRecipe = it } // Al hacer clic en una receta, se abre el modal
+                onRecipeClick = { selectedRecipe = it }
             )
         }
     }

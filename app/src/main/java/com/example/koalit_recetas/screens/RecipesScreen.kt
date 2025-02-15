@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.koalit_recetas.data.RecipeEntity
 import com.example.koalit_recetas.viewModel.RecipeViewModel
 
 //Usar ROOM Database para almacenar los datos localmente.
@@ -141,14 +142,14 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
             Button(
                 onClick = {
                     if (name.value.isNotEmpty() && time.value.isNotEmpty()) {
-                        val newRecipe = Recipe(
+                        val newRecipe = RecipeEntity(
                             title = name.value,
                             description = description.value,
                             time = time.value.toIntOrNull() ?: 0,
-                            image = imageUri.value?.toString() ?: "", // Guardar la URI de la imagen
+                            image = imageUri.value?.toString() ?: "",
                             isFavorite = isFavorite.value,
                             pasos = steps.value,
-                            ingredientes = ingredients.toList()
+                            ingredientes = ingredients.joinToString(";") // Guardar lista como string
                         )
                         recipeViewModel.addRecipe(newRecipe)
                         navController.popBackStack()
@@ -159,6 +160,7 @@ fun RecipeScreen(navController: NavHostController, recipeViewModel: RecipeViewMo
             ) {
                 Text("Guardar")
             }
+
 
             Spacer(modifier = Modifier.width(8.dp))
 
